@@ -1,0 +1,6 @@
+# Robots.txt for Happy Diwali 3D (https://happydiwali.devs.surf)
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://happydiwali.devs.surf/sitemap.xml

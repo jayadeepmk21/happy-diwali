@@ -101,3 +101,4 @@ Integrated with high-definition album art, vinyl rotation, scrubbing, and backgr
 Distributed under the MIT License. See `LICENSE` for more information.
 
 **Wishing you and your family a very Happy, Safe & Prosperous Diwali! 🪔✨**
+

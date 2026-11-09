@@ -924,6 +924,25 @@ class PatakhaApp {
             };
         }
 
+        // SEO Festival Guide & FAQ Modal Wiring
+        const btnOpenGuide = document.getElementById('btn-open-guide');
+        const btnCloseGuide = document.getElementById('btn-close-guide');
+        const guideModal = document.getElementById('seo-guide-modal');
+        if (btnOpenGuide && guideModal) {
+            btnOpenGuide.onclick = () => {
+                this.audio.playUIClick();
+                guideModal.classList.remove('hidden');
+            };
+        }
+        if (btnCloseGuide && guideModal) {
+            btnCloseGuide.onclick = () => guideModal.classList.add('hidden');
+        }
+        if (guideModal) {
+            guideModal.onclick = (e) => {
+                if (e.target.id === 'seo-guide-modal') guideModal.classList.add('hidden');
+            };
+        }
+
         // Desktop Mouse Wheel Horizontal Scrolling for Cracker Arsenal Bar
         if (this.dom.arsenalContainer) {
             this.dom.arsenalContainer.addEventListener('wheel', (evt) => {

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>3D Patakha Sandbox - Desi Diwali Demolition</title>
+    <meta name="description" content="Play with 17 3D Patakhas, Street Lamps, Dabba Udao Trick, and Destructible Sandbox Physics on Phone & Laptop!">
+    <meta name="theme-color" content="#06050e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Patakha 3D">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧨</text></svg>">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js r128 CDN & GLTF Loader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <!-- Custom Pro Stylesheet with Cache-Buster -->
+    <link rel="stylesheet" href="css/style.css?v=10.0">
+</head>
+<body class="text-amber-50">
+
+    <!-- 3D WebGL Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Screen Flash Overlay -->
+    <div id="flash-overlay"></div>
+
+    <!-- HILARIOUS SCREEN MUD SPLATTER OVERLAY (Gobar Blast Prank) -->
+    <div id="gobar-splat-overlay" class="fixed inset-0 pointer-events-none z-50 transition-opacity duration-700 opacity-0 hidden">
+        <div class="relative w-full h-full flex flex-col items-center justify-center p-4">
+            <!-- Mud Splat Graphics -->
+            <svg class="w-full h-full max-w-md max-h-[380px] text-amber-950/90 filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.85)] animate-pulse" viewBox="0 0 400 400" fill="currentColor">
+                <!-- Large center organic splat -->
+                <path d="M190,130 C220,105 265,125 275,155 C295,165 315,195 295,225 C305,255 275,285 245,280 C215,305 175,295 155,275 C125,285 95,255 105,225 C85,195 105,160 135,155 C145,125 175,115 190,130 Z" opacity="0.94"/>
+                <!-- Dripping Mud trails -->
+                <path d="M165,285 C160,325 170,355 168,380 C166,386 160,386 158,380 C155,350 156,315 160,285 Z" opacity="0.90"/>
+                <path d="M235,275 C240,315 230,345 233,370 C235,376 241,376 242,370 C245,340 242,305 238,275 Z" opacity="0.90"/>
+                <path d="M195,280 C198,320 196,360 197,390 C198,395 204,395 205,390 C206,360 205,320 202,280 Z" opacity="0.85"/>
+                <!-- Flying mud droplets -->
+                <circle cx="85" cy="110" r="16" opacity="0.88"/>
+                <circle cx="55" cy="155" r="11" opacity="0.88"/>
+                <circle cx="325" cy="130" r="18" opacity="0.88"/>
+                <circle cx="355" cy="175" r="13" opacity="0.88"/>
+                <circle cx="315" cy="305" r="15" opacity="0.88"/>
+                <circle cx="88" cy="295" r="14" opacity="0.88"/>
+                <circle cx="210" cy="65" r="17" opacity="0.88"/>
+                <circle cx="120" cy="80" r="10" opacity="0.88"/>
+                <circle cx="280" cy="85" r="12" opacity="0.88"/>
+            </svg>
+            <div class="absolute bottom-28 bg-amber-950/95 text-amber-200 border-2 border-amber-500 rounded-full px-5 py-2 font-black text-xs sm:text-sm shadow-2xl flex items-center gap-2 animate-bounce">
+                <span class="text-base">💩</span>
+                <span>ABE SAALE! GOBAR PHOD DIYA! 😂</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIRAL WHATSAPP UNLOCK MODAL -->
+    <div id="viral-unlock-modal" class="fixed inset-0 z-50 pointer-events-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden transition-all">
+        <div class="hud-glass rounded-3xl p-5 md:p-6 border border-amber-400/40 shadow-[0_20px_60px_rgba(0,0,0,0.95)] max-w-sm w-full text-center relative flex flex-col items-center gap-3">
+            
+            <!-- Close Button -->
+            <button id="btn-close-unlock-modal" class="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-amber-200 text-xs font-bold transition">
+                ✕
+            </button>
+
+            <!-- Big Pulsing Locked Icon -->
+            <div id="unlock-modal-icon-box" class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-600 via-yellow-700 to-amber-900 flex items-center justify-center text-3xl shadow-xl shadow-amber-500/30 border border-amber-300 animate-pulse">
+                <span id="unlock-modal-icon">💩</span>
+            </div>
+
+            <!-- Title & Subtitle -->
+            <div>
+                <h3 id="unlock-modal-title" class="text-base md:text-lg font-black text-amber-200 uppercase tracking-wide">
+                    GOBAR DHAMAKA UNLOCK KARO!
+                </h3>
+                <p id="unlock-modal-desc" class="text-xs text-amber-100/75 mt-1 leading-relaxed">
+                    Bachpan ka sabse khatarnak desi prank! 3 dosto ko WhatsApp par bhejo aur instantly unlock karo!
+                </p>
+            </div>
+
+            <!-- Share Step Progress Circles -->
+            <div id="unlock-share-steps" class="flex items-center justify-center gap-3 my-1">
+                <div id="step-dot-1" class="w-8 h-8 rounded-full border-2 border-amber-400/40 bg-white/5 flex items-center justify-center text-xs font-bold text-amber-300">1</div>
+                <div class="h-0.5 w-4 bg-white/20"></div>
+                <div id="step-dot-2" class="w-8 h-8 rounded-full border-2 border-amber-400/40 bg-white/5 flex items-center justify-center text-xs font-bold text-amber-300">2</div>
+                <div class="h-0.5 w-4 bg-white/20"></div>
+                <div id="step-dot-3" class="w-8 h-8 rounded-full border-2 border-amber-400/40 bg-white/5 flex items-center justify-center text-xs font-bold text-amber-300">3</div>
+            </div>
+
+            <div id="unlock-progress-text" class="text-xs font-bold text-emerald-400">
+                0 / 3 Shares Completed!
+            </div>
+
+            <!-- Big Green WhatsApp Share Button -->
+            <button id="btn-whatsapp-share" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/40 active:scale-95 transition">
+                <span class="text-lg">📲</span>
+                <span id="whatsapp-btn-text">WhatsApp Par Bhejo (0/3)</span>
+            </button>
+
+            <!-- Copy Link Button -->
+            <button id="btn-copy-share-link" class="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-amber-200 text-xs font-bold flex items-center justify-center gap-1.5 border border-white/10 transition">
+                <span>🔗</span>
+                <span id="copy-btn-text">Direct Link Copy Karo</span>
+            </button>
+
+            <!-- Anti-Cheat Notice -->
+            <div class="text-[10.5px] text-amber-300/80 bg-black/40 border border-amber-500/20 rounded-lg px-2.5 py-1.5 leading-snug">
+                ⚡ <b>Verification:</b> WhatsApp par kisi dost ko send karke wapas aane par hi 1 share approve hoga! Link copy karne se unlock nahi hoga.
+            </div>
+
+            <!-- Reset Button for Testing -->
+            <button id="btn-reset-shares" class="text-[10px] text-amber-200/50 hover:text-amber-200 underline mt-0.5">
+                🔄 Re-lock / Reset Progress for Testing
+            </button>
+        </div>
+    </div>
+
+    <!-- RECURRING 1:30 MIN VIRAL SHARE MODAL -->
+    <div id="recurring-share-modal" class="fixed inset-0 z-50 pointer-events-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden transition-all">
+        <div class="hud-glass rounded-3xl p-5 md:p-6 border border-emerald-400/40 shadow-[0_20px_60px_rgba(0,0,0,0.95)] max-w-sm w-full text-center relative flex flex-col items-center gap-3">
+            
+            <!-- Close Button -->
+            <button id="btn-close-recurring-modal" class="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-amber-200 text-xs font-bold transition">
+                ✕
+            </button>
+
+            <!-- Pulsing Diwali Diya Icon -->
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-600 to-green-700 flex items-center justify-center text-3xl shadow-xl shadow-emerald-500/30 border border-emerald-300 animate-pulse">
+                <span>🪔</span>
+            </div>
+
+            <!-- Title & Subtitle -->
+            <div>
+                <h3 class="text-base md:text-lg font-black text-amber-200 uppercase tracking-wide">
+                    DOSTO KO WHATSAPP PAR BHEJO!
+                </h3>
+                <p class="text-xs text-amber-100/80 mt-1.5 leading-relaxed">
+                    Bhai akele-akele patakhe phod raha hai? Dosto aur family ko WhatsApp par bhejo aur sabke saath Diwali manao! 😂💥
+                </p>
+            </div>
+
+            <div class="text-[11px] text-emerald-300 font-bold bg-emerald-950/60 border border-emerald-500/30 rounded-xl px-3 py-1.5 w-full">
+                🎁 1 Share karte hi 10,000-Wala Mahabali Lar unlock hoga!
+            </div>
+
+            <!-- Big Green WhatsApp Share Button -->
+            <button id="btn-recurring-whatsapp-share" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/40 active:scale-95 transition">
+                <span class="text-lg">📲</span>
+                <span id="recurring-whatsapp-btn-text">WhatsApp Par Share Karo</span>
+            </button>
+
+            <!-- Remind Later Button -->
+            <button id="btn-recurring-later" class="w-full py-1.5 px-3 text-amber-200/60 hover:text-amber-200 text-xs font-medium transition">
+                Baad mein bhejunga (1:30 min baad wapas aayega)
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast-banner" class="fixed top-16 md:top-20 left-1/2 -translate-x-1/2 z-30 pointer-events-none opacity-0 transition-all duration-300 transform -translate-y-2">
+        <div class="hud-glass px-4 py-2 rounded-full border border-amber-400/50 text-amber-200 font-bold text-xs md:text-sm shadow-2xl flex items-center gap-2">
+            <span id="toast-icon">💥</span>
+            <span id="toast-text">Sutli Bomb Taiyaar!</span>
+        </div>
+    </div>
+
+    <!-- TOP NAVIGATION BAR (Clean & Fully Responsive HUD) -->
+    <header class="fixed top-0 left-0 right-0 z-30 px-2 py-1.5 md:px-5 md:py-2.5 pointer-events-none flex items-center justify-between gap-1.5 sm:gap-3 max-w-7xl mx-auto">
+        <!-- Left: Brand Logo Pill (Clean & Minimal) -->
+        <div class="hud-glass rounded-full px-2.5 py-1 md:px-3.5 md:py-1.5 pointer-events-auto flex items-center gap-1.5 md:gap-2 border border-white/10 shadow-2xl shrink-0">
+            <div class="w-6 h-6 md:w-7 md:h-7 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-red-600 flex items-center justify-center text-xs md:text-sm shadow-md shadow-orange-500/30 shrink-0">
+                🧨
+            </div>
+            <span class="text-xs md:text-sm font-black tracking-wider text-amber-200 uppercase leading-none">PATAKHA 3D</span>
+        </div>
+
+        <!-- Center (Desktop Only >= 768px): Integrated Deluxe Salon Music Capsule -->
+        <div id="deluxe-music-capsule" class="hidden md:flex hud-deluxe-glass rounded-full px-3 py-1.5 pointer-events-auto items-center gap-2.5 border border-amber-400/30 shadow-[0_6px_25px_rgba(0,0,0,0.85)] backdrop-blur-2xl transition-all duration-300 min-w-0 max-w-[420px]">
+            
+            <!-- Spinning Vinyl Record Disc (Album Art) -->
+            <div id="deluxe-vinyl-wrap" class="relative w-8 h-8 rounded-full overflow-hidden shrink-0 border border-amber-400/50 deluxe-vinyl-disc shadow-md cursor-pointer" title="Click to view playlist">
+                <img id="player-art" src="assets/audio/songs/kesariya.jpg" alt="Art" class="w-full h-full object-cover rounded-full">
+                <div class="absolute inset-0 m-auto w-2 h-2 rounded-full bg-slate-950 border border-amber-300 pointer-events-none"></div>
+                <div id="music-pill-eq" class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center gap-0.5 opacity-0 transition-opacity pointer-events-none">
+                    <span class="music-wave-bar"></span>
+                    <span class="music-wave-bar"></span>
+                    <span class="music-wave-bar"></span>
+                </div>
+            </div>
+
+            <!-- Song Info & Scrub Line -->
+            <div class="flex-1 min-w-0 flex flex-col justify-center">
+                <div class="flex items-center justify-between gap-1 leading-tight">
+                    <div id="player-title" class="text-xs font-black text-amber-100 truncate tracking-wide">
+                        Kesariya
+                    </div>
+                    <span id="player-curr-time" class="text-[9px] text-amber-200/70 font-mono shrink-0">0:00</span>
+                </div>
+                <div id="player-progress-bar-wrap" class="h-1 bg-white/10 rounded-full overflow-hidden mt-0.5 cursor-pointer relative hover:h-1.5 transition-all">
+                    <div id="player-progress-bar" class="h-full w-0 bg-gradient-to-r from-emerald-400 via-amber-400 to-orange-500 rounded-full"></div>
+                </div>
+                <div id="player-movie" class="hidden"></div>
+                <div id="player-total-time" class="hidden"></div>
+            </div>
+
+            <!-- Playback Controls -->
+            <div class="flex items-center gap-1 shrink-0">
+                <button id="btn-player-prev" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-amber-200 text-xs transition" title="Previous Track">⏮</button>
+                <button id="btn-player-play" class="w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black flex items-center justify-center text-xs shadow-md shadow-emerald-500/40 hover:scale-105 active:scale-95 transition" title="Play / Pause">
+                    <span id="player-play-icon">▶</span>
+                </button>
+                <button id="btn-player-next" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-amber-200 text-xs transition" title="Next Track">⏭</button>
+                <button id="btn-toggle-playlist" class="w-6 h-6 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 flex items-center justify-center text-amber-300 text-xs transition" title="Diwali Playlist (13 Tracks)">🎶</button>
+                <button id="btn-player-minimize" class="hidden"></button>
+            </div>
+        </div>
+
+        <!-- Right: Mobile Music Pill, Audio & Arena Reset -->
+        <div class="hud-glass rounded-full px-2 py-1 md:px-2.5 md:py-1.5 pointer-events-auto flex items-center gap-1 border border-white/10 shadow-2xl shrink-0">
+            <!-- Mobile Jukebox Trigger (< 768px) -->
+            <button id="btn-open-music" class="action-chip text-amber-200 border-amber-400/40 md:hidden flex items-center gap-1.5 py-1 px-2" title="Diwali Music Player">
+                <div class="w-4 h-4 rounded-full overflow-hidden border border-amber-300/60 shrink-0">
+                    <img id="mobile-mini-art" src="assets/audio/songs/kesariya.jpg" alt="" class="w-full h-full object-cover">
+                </div>
+                <span id="mobile-mini-title" class="text-[10px] font-bold truncate max-w-[70px]">Kesariya</span>
+                <span id="mobile-mini-play" class="text-[10px] text-emerald-400 font-black">▶</span>
+            </button>
+
+            <!-- Global Utility Toggles -->
+            <button id="btn-header-share" class="action-chip bg-emerald-500/20 text-emerald-300 border-emerald-400/40 hover:bg-emerald-500/30 flex items-center gap-1" title="Dosto ko WhatsApp par bhejo!">
+                <span>📲</span> <span class="hidden sm:inline font-bold text-[10px]">Share</span>
+            </button>
+            <button id="btn-sound" class="action-chip" title="Toggle Audio [Key: S]">
+                <span id="sound-icon">🔊</span>
+            </button>
+            <button id="btn-fullscreen" class="action-chip hidden sm:flex" title="Toggle Fullscreen [Key: F]">
+                <span>⛶</span>
+            </button>
+            <button id="btn-clear" class="action-chip clear-btn" title="Clear Arena [Key: R / X]">
+                <span>🧹</span> <span class="hidden md:inline">Saaf</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- FLOATING PLAYLIST & JUKEBOX MODAL (Directly below header) -->
+    <div id="deluxe-playlist-drawer" class="fixed top-12 md:top-14 left-1/2 -translate-x-1/2 z-40 hud-deluxe-glass rounded-2xl p-3 border border-amber-400/30 shadow-[0_15px_60px_rgba(0,0,0,0.95)] backdrop-blur-2xl hidden transition-all w-[94%] max-w-[420px] pointer-events-auto">
+        <!-- Drawer Header with Close Button -->
+        <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+            <div class="flex items-center gap-1.5">
+                <span class="text-sm">📻</span>
+                <span class="text-xs font-black text-amber-200 uppercase tracking-wider">Diwali Jukebox (13 Tracks)</span>
+            </div>
+            <button id="btn-close-playlist" class="w-6 h-6 rounded-full hover:bg-white/15 flex items-center justify-center text-amber-200/70 hover:text-white text-xs font-bold transition">
+                ✕
+            </button>
+        </div>
+
+        <!-- Mobile Active Track Player Card inside Drawer -->
+        <div class="md:hidden bg-white/5 rounded-xl p-2.5 mb-2.5 border border-white/10 flex items-center gap-3">
+            <div class="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border-2 border-amber-400/50 shadow-md">
+                <img id="drawer-player-art" src="assets/audio/songs/kesariya.jpg" alt="" class="w-full h-full object-cover">
+                <div class="absolute inset-0 m-auto w-2.5 h-2.5 rounded-full bg-slate-950 border border-amber-300"></div>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div id="drawer-player-title" class="text-xs font-black text-amber-100 truncate">Kesariya</div>
+                <div id="drawer-player-artist" class="text-[9px] text-amber-200/70 truncate">Brahmāstra • Arijit Singh</div>
+                <div id="drawer-progress-bar-wrap" class="h-1.5 bg-black/60 rounded-full overflow-hidden mt-1.5 cursor-pointer relative">
+                    <div id="drawer-progress-bar" class="h-full w-0 bg-gradient-to-r from-emerald-400 to-amber-400 rounded-full"></div>
+                </div>
+            </div>
+            <div class="flex items-center gap-1">
+                <button id="btn-drawer-play" class="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 font-black flex items-center justify-center text-sm shadow-md">
+                    <span id="drawer-play-icon">▶</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 13 Songs Scroll List -->
+        <div id="playlist-list" class="flex flex-col gap-1 max-h-52 overflow-y-auto pr-1">
+            <!-- Dynamically populated -->
+        </div>
+
+        <!-- Sponsor Shoutout in Playlist Drawer -->
+        <div class="mt-2.5 pt-2 border-t border-amber-400/20 flex items-center justify-between text-[9px] text-amber-200/80 px-1">
+            <span class="text-amber-300 font-bold">⚡ Sponsors:</span>
+            <div class="flex items-center gap-2">
+                <a href="https://unlocked.devs.surf/" target="_blank" rel="noopener" class="text-cyan-300 hover:text-white underline font-bold transition">Unlocked.devs.surf</a>
+                <span class="text-amber-400/40">•</span>
+                <a href="https://jayfront.devs.surf/" target="_blank" rel="noopener" class="text-amber-300 hover:text-white underline font-bold transition">Jayfront.devs.surf</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING DETONATE ALL BUTTON (Centered & Thumb-Friendly) -->
+    <div id="detonate-panel" class="fixed bottom-28 md:bottom-32 left-1/2 -translate-x-1/2 z-20 pointer-events-auto transition-all duration-300 transform scale-0 opacity-0">
+        <button id="btn-detonate-all" class="detonate-btn px-6 py-2.5 rounded-full text-white font-black text-xs md:text-sm tracking-wide uppercase flex items-center gap-2 border-2 border-amber-300 shadow-2xl">
+            <span class="text-base animate-pulse">🔥</span>
+            <span>SAB EK SAATH PHODO! (<span id="unlit-count" class="mono-num">0</span>)</span>
+        </button>
+    </div>
+
+    <!-- BOTTOM UNIFIED ACTION CONSOLE & CRACKER ARSENAL (Professional Game Layout) -->
+    <footer class="fixed bottom-0 left-0 right-0 z-20 pb-2 md:pb-3 pt-1 px-2 md:px-6 pointer-events-none flex flex-col items-center gap-1.5 safe-bottom">
+        <!-- Row 1: Firing Modes (4 Equal Mode Buttons - Zero Overflow, Perfectly Centered) -->
+        <div class="hud-glass rounded-full p-1 pointer-events-auto flex items-center justify-between gap-1 border border-white/10 shadow-2xl w-full max-w-[360px] sm:max-w-[420px]">
+            <button id="mode-instant" class="mode-pill active flex-1" title="Instant Detonation Mode">
+                <span>⚡</span>
+                <span class="text-[10px] sm:text-xs font-bold">Instant</span>
+            </button>
+            <button id="mode-setup" class="mode-pill flex-1" title="Setup Chain Mode">
+                <span>💣</span>
+                <span class="text-[10px] sm:text-xs font-bold">Chain</span>
+            </button>
+            <button id="mode-agarbatti" class="mode-pill flex-1" title="Manual Agarbatti Light Mode">
+                <span>🔥</span>
+                <span class="text-[10px] sm:text-xs font-bold">Agarbatti</span>
+            </button>
+            <button id="btn-quick-fest" class="mode-pill text-purple-300 hover:text-white flex-1" title="Launch Grand Diwali Show [Key: G]">
+                <span>✨</span>
+                <span class="text-[10px] sm:text-xs font-bold hidden sm:inline">Grand Show</span>
+                <span class="text-[10px] sm:text-xs font-bold sm:hidden">Show</span>
+            </button>
+        </div>
+
+        <!-- Row 2: Desi Sandbox Gadgets & Camera Zoom Controls -->
+        <div class="hud-glass rounded-full p-1 pointer-events-auto flex items-center justify-between gap-1 border border-amber-400/25 shadow-2xl w-full max-w-[360px] sm:max-w-[420px]">
+            <button id="btn-spawn-pyramid" class="mode-pill text-amber-200 hover:text-white flex-1" title="Spawn Can Pyramid [Key: C / P]">
+                <span>🥫</span>
+                <span class="text-[10px] sm:text-xs font-bold hidden sm:inline">Can Pyramid</span>
+                <span class="text-[10px] sm:text-xs font-bold sm:hidden">Pyramid</span>
+            </button>
+            <button id="btn-sutli-dabba" class="mode-pill text-orange-200 hover:text-white flex-1" title="Sutli Bomb + 15L Tin Dabba Rocket Trick [Key: T / D]">
+                <span>🪣</span>
+                <span class="text-[10px] sm:text-xs font-bold hidden sm:inline">Dabba Trick</span>
+                <span class="text-[10px] sm:text-xs font-bold sm:hidden">Dabba</span>
+            </button>
+            <button id="btn-akash-diya" class="mode-pill text-yellow-200 hover:text-white flex-1" title="Release Sky Lantern [Key: L]">
+                <span>🏮</span>
+                <span class="text-[10px] sm:text-xs font-bold hidden sm:inline">Akash Diya</span>
+                <span class="text-[10px] sm:text-xs font-bold sm:hidden">Diya</span>
+            </button>
+
+            <!-- Vertical Divider -->
+            <div class="h-4 w-px bg-white/20 mx-0.5 shrink-0"></div>
+
+            <!-- Sky Theme Toggle -->
+            <button id="btn-theme" class="mode-pill text-blue-200 hover:text-white px-2" title="Toggle Sky Theme (Sunset / Midnight)">
+                <span>🌆</span>
+            </button>
+
+            <!-- Zoom Controls -->
+            <button id="btn-zoom-in" class="mode-pill text-emerald-200 hover:text-white px-2" title="Zoom In [+]">
+                <span class="text-xs font-bold">🔍+</span>
+            </button>
+            <button id="btn-zoom-out" class="mode-pill text-cyan-200 hover:text-white px-2" title="Zoom Out [−]">
+                <span class="text-xs font-bold">🔍−</span>
+            </button>
+        </div>
+
+        <!-- Row 3: Inventory Cracker Card Deck with Smooth Horizontal Scroll -->
+        <div class="arsenal-deck-wrap hud-glass rounded-2xl p-1 md:p-2 pointer-events-auto max-w-full md:max-w-5xl lg:max-w-6xl border border-white/10 shadow-2xl w-full sm:w-auto">
+            <div id="arsenal-container" class="flex items-center gap-1.5 md:gap-2 overflow-x-auto no-scrollbar py-0.5 px-2">
+                <!-- Injected dynamically by app.js -->
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modular Script Imports (Cache-Busted v10.0 - High-Fidelity 60 FPS Engine) -->
+    <script src="js/audio.js?v=10.0"></script>
+    <script src="js/music.js?v=10.0"></script>
+    <script src="js/particles.js?v=10.0"></script>
+    <script src="js/props.js?v=10.0"></script>
+    <script src="js/patakhas.js?v=10.0"></script>
+    <script src="js/scene.js?v=10.0"></script>
+    <script src="js/environment.js?v=10.0"></script>
+    <script src="js/app.js?v=10.0"></script>
+</body>
+</html>

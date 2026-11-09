@@ -1,0 +1,12 @@
+JAYFRONT original convoy vehicles and ruined checkpoint wreck
+Author: MK Jayadeep
+Source: scripts/blender/build_convoy_vehicles.py
+Assets: convoy-scout.glb, convoy-hauler.glb, convoy-ram.glb, burnt-wreck.glb
+License: Original project assets; all rights reserved under the repository's existing license.
+Meshes, 512px palettes/textures and unit marks are original. No external geometry,
+photograph, camouflage texture or manufacturer logo is included. Burnt-wreck is
+a crumpled/scorched derivative of the original convoy-scout geometry.
+
+Reference-only primary construction context (not asset sources):
+https://oshkoshdefense.com/vehicles/light-tactical-vehicles/jltv/
+https://oshkoshdefense.com/wp-content/uploads/2021/01/2021OverviewBooklet_DigitalFinal_Spreads_01272021.pdf

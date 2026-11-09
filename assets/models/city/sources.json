@@ -1,0 +1,46 @@
+{
+  "pack": "City Kit Commercial 2.1",
+  "creator": "Kenney",
+  "source": "https://kenney.nl/assets/city-kit-commercial",
+  "download": "https://kenney.nl/media/pages/assets/city-kit-commercial/a742d900eb-1753115042/kenney_city-kit-commercial_2.1.zip",
+  "downloaded": "2026-10-03",
+  "license": "CC0-1.0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "files": [
+    {
+      "file": "building-a.glb",
+      "bytes": 108936,
+      "sha256": "5cf220f90ee3f21e7abe38055ca409a48aa8ef1d5ffab6e2deb99e5a5e1ed5e0"
+    },
+    {
+      "file": "building-e.glb",
+      "bytes": 128208,
+      "sha256": "edbe5b49858a3c83e72d3cf496129c06082ef3a3d6005769f8883138e275b456"
+    },
+    {
+      "file": "building-g.glb",
+      "bytes": 166356,
+      "sha256": "9a28fa2fdfac07492ee95589882213cfd6eb32d6752cb3b2f5404604c676d27a"
+    },
+    {
+      "file": "building-skyscraper-a.glb",
+      "bytes": 111336,
+      "sha256": "d8339bbb75944ff91d1ec9a70ec6dead71bd98b94a42d3dd0fc1f3b107ddbe85"
+    },
+    {
+      "file": "building-skyscraper-c.glb",
+      "bytes": 149524,
+      "sha256": "e73c357554f7561fedb8c1cbecf9d7163ba09ada264d661c59a0f0a180e0185f"
+    },
+    {
+      "file": "low-detail-building-m.glb",
+      "bytes": 15112,
+      "sha256": "597d8c18ac63de895de66fc4fe0695bd9958d76ccb9b340ad0dfd1589666a22e"
+    },
+    {
+      "file": "Textures/colormap.png",
+      "bytes": 11002,
+      "sha256": "191bec3889aaaca5018380038fecc129ebb5c2182879a099b7b538b3fa050b5d"
+    }
+  ]
+}

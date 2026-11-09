@@ -1,0 +1,20 @@
+JAYFRONT city model credits
+
+City Kit Commercial 2.1 — Kenney
+Creator: https://kenney.nl/
+Official source: https://kenney.nl/assets/city-kit-commercial
+Downloaded: 2026-10-03
+License: Creative Commons Zero (CC0 1.0 Universal)
+License URL: https://creativecommons.org/publicdomain/zero/1.0/
+Original license: Kenney-License.txt
+
+Runtime models: building-a.glb, building-e.glb, building-g.glb,
+building-skyscraper-a.glb, building-skyscraper-c.glb,
+low-detail-building-m.glb.
+Runtime texture: Textures/colormap.png.
+
+Changes: selected six models from the official pack; source files unchanged.
+Runtime geometry is normalized, shared and instanced; palette is tinted for
+JAYFRONT's districts. No creator endorsement is implied.
+Original barricades, street lamps, traffic signals, vehicles and street layouts
+are authored in JAYFRONT by MK Jayadeep.

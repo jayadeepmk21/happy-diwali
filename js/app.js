@@ -202,10 +202,9 @@ class PatakhaApp {
         // Setup DOM event listeners
         this.bindUIEvents();
 
-        // Spawn starter objects nicely framed around courtyard
+        // Spawn starter objects nicely framed around courtyard (No cylinder pre-placed; user places it Minecraft style!)
         this.propsEngine.spawnPyramid(-3.5, -2.0);
         this.propsEngine.createProp('big_dabba', new THREE.Vector3(3.5, 0.94, -2.0));
-        this.propsEngine.spawnGasCylinder(-3.2, 1.8);
         this.updateHUDCounters();
 
         // Start animation loop
@@ -215,7 +214,17 @@ class PatakhaApp {
     handleFloorClick(worldPos) {
         this.audio.init();
 
-        // Check if user clicked near the 14.2 KG LPG Gas Cylinder
+        const type = this.patakhaManager.selectedType;
+
+        // Minecraft Mode: Place 14.2 KG Gas Cylinder wherever user clicks!
+        if (type && type.id === 'gas_cylinder') {
+            this.patakhaManager.spawn(type, worldPos, false);
+            this.showToast('🛢️ 14.2 KG Bharat Gas Cylinder Rakh Diya! Ab iske bagal me Bomb lagao ya Agarbatti dikhao! 💀');
+            this.updateHUDCounters();
+            return;
+        }
+
+        // Check if user clicked near an already placed 14.2 KG LPG Gas Cylinder
         const cylinderProp = this.propsEngine.props.find(p => p.type === 'gas_cylinder');
         if (cylinderProp && cylinderProp.mesh && cylinderProp.mesh.position.distanceTo(worldPos) < 1.45) {
             this.triggerCylinderWarning(cylinderProp);
@@ -265,7 +274,6 @@ class PatakhaApp {
             }
         }
 
-        const type = this.patakhaManager.selectedType;
         const isInstant = this.patakhaManager.placementMode === 'instant';
 
         const bomb = this.patakhaManager.spawn(type, worldPos, isInstant);
@@ -926,14 +934,18 @@ class PatakhaApp {
             }, { passive: false });
         }
 
-        // 14.2 KG Gas Cylinder Bakchodi Toolbar Button
+        // 14.2 KG Gas Cylinder Minecraft Mode Selection Button
         const btnGasCylinder = document.getElementById('btn-gas-cylinder');
         if (btnGasCylinder) {
             btnGasCylinder.onclick = () => {
                 this.audio.init();
-                const cylProp = this.propsEngine.spawnGasCylinder(-3.2, 1.8);
-                this.triggerCylinderWarning(cylProp);
-                this.updateHUDCounters();
+                this.audio.playUIClick();
+                const cylDef = PATAKHA_DEFINITIONS.find(p => p.id === 'gas_cylinder');
+                if (cylDef) {
+                    this.patakhaManager.selectedType = cylDef;
+                    this.renderArsenalCards();
+                    this.showToast('🛢️ Minecraft Mode: Courtyard mein jahan marzi click karke Gas Cylinder rakho! 🔨');
+                }
             };
         }
 
@@ -1118,8 +1130,7 @@ class PatakhaApp {
             }, 300);
         }
 
-        // Respawn Gas Cylinder & Props
-        this.propsEngine.spawnGasCylinder(-3.2, 1.8);
+        // Respawn Props (Courtyard remains clean for user to place cylinder whenever they want!)
         this.propsEngine.spawnPyramid(-3.5, -2.0);
         this.showToast('🪔 Mohalla Wapas Aa Gaya! Agli baar cylinder se door rehna bhai! 😂');
         this.updateHUDCounters();

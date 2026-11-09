@@ -243,6 +243,18 @@ const PATAKHA_DEFINITIONS = [
         locked: true,
         viralType: 'mega_lar',
         requiredShares: 1
+    },
+    {
+        id: 'gas_cylinder',
+        name: '14.2 KG Gas Cylinder',
+        hindiName: 'गैस सिलेंडर',
+        subtitle: '⚠️ Extreme Danger • Diwala Nikal Jayega!',
+        icon: '🛢️',
+        badgeColor: 'from-red-600 via-rose-700 to-amber-700',
+        fuseTime: 0,
+        blastRadius: 30.0,
+        blastForce: 85,
+        key: 'B'
     }
 ];
 
@@ -1148,6 +1160,23 @@ class PatakhaManager {
     }
 
     spawn(typeObj, worldPos, igniteImmediately = true) {
+        if (typeObj.id === 'gas_cylinder') {
+            const cyl = this.propsEngine.createProp('gas_cylinder', new THREE.Vector3(worldPos.x, 0.95, worldPos.z));
+            this.audio.playMetallicClang(1.2);
+            for (let i = 0; i < 6; i++) {
+                this.particles.spawnSmoke(
+                    worldPos,
+                    new THREE.Vector3((Math.random() - 0.5) * 2, 0.4 + Math.random() * 0.8, (Math.random() - 0.5) * 2),
+                    0x78716c,
+                    0.4,
+                    0.5,
+                    0.8,
+                    0.8
+                );
+            }
+            return cyl;
+        }
+
         const mesh = this.buildMesh(typeObj.id);
         mesh.position.copy(worldPos);
         mesh.rotation.y = Math.random() * Math.PI * 2;

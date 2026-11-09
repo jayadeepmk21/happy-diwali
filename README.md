@@ -1,6 +1,18 @@
 # 🪔 Patakha 3D — The Ultimate Virtual Diwali Experience 🎆
 
+[![Live Website](https://img.shields.io/badge/Live_Website-happydiwali.devs.surf-brightgreen?style=for-the-badge&logo=googlechrome&logoColor=white)](https://happydiwali.devs.surf)
+[![Vercel Mirror](https://img.shields.io/badge/Vercel_Mirror-happydiwali--jade.vercel.app-black?style=for-the-badge&logo=vercel&logoColor=white)](https://happydiwali-jade.vercel.app)
+[![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-Active-blue?style=for-the-badge&logo=github&logoColor=white)](https://jayadeepmk21.github.io/happy-diwali/)
+[![Three.js](https://img.shields.io/badge/Three.js-r128-black?style=for-the-badge&logo=threedotjs&logoColor=white)](https://threejs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
+
 A high-fidelity, real-time 3D Diwali courtyard simulator built with **Three.js**, procedural **Web Audio API**, and **Tailwind CSS**. Celebrate an eco-friendly, pollution-free, noise-free yet thunderous Diwali right inside your browser!
+
+🌐 **Play Instantly**: [https://happydiwali.devs.surf](https://happydiwali.devs.surf)  
+⚡ **Alternative Vercel URL**: [https://happydiwali-jade.vercel.app](https://happydiwali-jade.vercel.app)  
+🐙 **GitHub Pages**: [https://jayadeepmk21.github.io/happy-diwali/](https://jayadeepmk21.github.io/happy-diwali/)
+
+---
 
 ![Diwali Banner](assets/audio/songs/kesariya.jpg)
 

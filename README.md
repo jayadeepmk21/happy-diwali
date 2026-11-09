@@ -51,7 +51,7 @@ A high-fidelity, real-time 3D Diwali courtyard simulator built with **Three.js**
 
 ---
 
-### 📻 Bollywood Diwali Party Jukebox (13 Tracks)
+### 📻 Bollywood Diwali Party Jukebox (12 Tracks)
 Integrated with high-definition album art, vinyl rotation, scrubbing, and background audio:
 1. *Kesariya* — Brahmāstra
 2. *Lover* — Diljit Dosanjh
@@ -64,8 +64,7 @@ Integrated with high-definition album art, vinyl rotation, scrubbing, and backgr
 9. *Sauda Khara Khara* — Good Newwz
 10. *Gallan Goodiyaan* — Dil Dhadakne Do
 11. *Ghungroo* — War
-12. *Badri Ki Dulhania* — BKD
-13. *High Heels Te Nachche* — Ki & Ka
+12. *High Heels Te Nachche* — Ki & Ka
 
 ---
 

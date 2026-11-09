@@ -39,15 +39,6 @@ const DIWALI_SONGS = [
         art: 'assets/audio/songs/ghungroo.jpg'
     },
     {
-        id: 'badri-ki-dulhania',
-        title: 'Badri Ki Dulhania',
-        movie: 'Badrinath Ki Dulhania',
-        artist: 'Dev Negi, Neha Kakkar, Monali Thakur, Ikka',
-        year: '2017',
-        src: 'assets/audio/songs/badri-ki-dulhania.mp3',
-        art: 'assets/audio/songs/badri-ki-dulhania.jpg'
-    },
-    {
         id: 'high-heels',
         title: 'High Heels Te Nachche',
         movie: 'Ki & Ka',

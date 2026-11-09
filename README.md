@@ -44,6 +44,7 @@ A high-fidelity, real-time 3D Diwali courtyard simulator built with **Three.js**
 ---
 
 ### 🪣 Desi Sandbox Physics & Destructible Props
+* **14.2 KG LPG Gas Cylinder (🛢️)** — Classic Indian red gas cylinder! Touch it with a lighter or blast it to trigger police sirens and viral meme warnings (*"Abe saale! Diwali hai, diwala nahi nikalna hai bc! 💀"*). Push the danger button to launch it like an ISRO rocket, triggering nuclear screen flash and the legendary *"Mohalla Disconnected"* screen!
 * **Dabba Udao Trick (🪣)** — Place a 15-liter vegetable oil tin dabba directly over a Sutli bomb and watch it shoot into orbit!
 * **Desi Can Pyramid (🥫)** — Stack 10 tin cans in a pyramid and blast them with shockwaves.
 * **Shattering Matkas (🏺)** — Clay pots with realistic fracture mechanics, shard scattering, and clay thud sounds.

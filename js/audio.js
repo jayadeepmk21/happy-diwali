@@ -423,6 +423,56 @@ class PatakhaAudioEngine {
         });
     }
 
+    // Emergency Red Alert Siren (Wailing Desi Police Siren)
+    playPoliceSiren(duration = 2.4) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+
+        const cycles = 3;
+        const cycleDur = duration / cycles;
+        for (let i = 0; i < cycles; i++) {
+            const tStart = now + i * cycleDur;
+            const tMid = tStart + cycleDur * 0.5;
+            const tEnd = tStart + cycleDur;
+            osc.frequency.setValueAtTime(620, tStart);
+            osc.frequency.linearRampToValueAtTime(1150, tMid);
+            osc.frequency.linearRampToValueAtTime(620, tEnd);
+        }
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(2200, now);
+
+        gain.gain.setValueAtTime(0.01, now);
+        gain.gain.linearRampToValueAtTime(0.24, now + 0.08);
+        gain.gain.setValueAtTime(0.24, now + duration - 0.2);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.compressor);
+
+        osc.start(now);
+        osc.stop(now + duration);
+        this.triggerHaptic('whistle');
+    }
+
+    // Nuclear Level Gas Cylinder Explosion Audio
+    playNuclearBlast() {
+        if (!this.enabled) return;
+        this.init();
+        this.playBlast(2.5, 'sutli');
+        this.playMetallicClang(2.0);
+        setTimeout(() => this.playBlast(1.8, 'atom'), 140);
+        setTimeout(() => this.playCarAlarm(), 450);
+    }
+
     // Distant Ambient Sky Shot Explosion Boom
     playDistantSkyBurst(pan = 0) {
         if (!this.enabled) return;

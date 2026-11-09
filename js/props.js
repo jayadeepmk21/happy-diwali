@@ -295,6 +295,85 @@ class PropsEngine {
             this.createCanTextureMaterial('thumsup'),
             this.createCanTextureMaterial('roohafza')
         ];
+
+        // --- 6. AUTHENTIC 14.2 KG BHARAT/INDANE LPG GAS CYLINDER ---
+        const cylCanvas = document.createElement('canvas');
+        cylCanvas.width = 512;
+        cylCanvas.height = 512;
+        const cCtx = cylCanvas.getContext('2d');
+
+        // High gloss safety red gradient
+        const cylGrad = cCtx.createLinearGradient(0, 0, 512, 0);
+        cylGrad.addColorStop(0, '#991b1b');
+        cylGrad.addColorStop(0.2, '#dc2626');
+        cylGrad.addColorStop(0.5, '#ef4444');
+        cylGrad.addColorStop(0.8, '#dc2626');
+        cylGrad.addColorStop(1, '#7f1d1d');
+        cCtx.fillStyle = cylGrad;
+        cCtx.fillRect(0, 0, 512, 512);
+
+        // Welded horizontal belly seam
+        cCtx.fillStyle = '#7f1d1d';
+        cCtx.fillRect(0, 252, 512, 8);
+        cCtx.fillStyle = '#f87171';
+        cCtx.fillRect(0, 254, 512, 3);
+
+        // Stencil White markings
+        cCtx.fillStyle = '#f8fafc';
+        cCtx.textAlign = 'center';
+
+        // Top Brand Arc / Text
+        cCtx.font = '900 32px system-ui, sans-serif';
+        cCtx.fillText('★ BHARAT GAS ★', 256, 85);
+
+        cCtx.font = 'bold 16px system-ui, sans-serif';
+        cCtx.fillStyle = '#fef08a';
+        cCtx.fillText('FOR DOMESTIC USE ONLY', 256, 118);
+
+        // Giant 14.2 kg Stencil
+        cCtx.fillStyle = '#ffffff';
+        cCtx.font = '900 84px Impact, system-ui, sans-serif';
+        cCtx.fillText('14.2 kg', 256, 215);
+
+        // Weights Tare & Gross
+        cCtx.font = 'bold 19px system-ui, monospace';
+        cCtx.fillStyle = '#f1f5f9';
+        cCtx.fillText('NET 14.2 kg | GROSS 29.8 kg', 256, 305);
+
+        // Danger Warning Box with Flame symbol
+        cCtx.strokeStyle = '#fef08a';
+        cCtx.lineWidth = 4;
+        cCtx.strokeRect(36, 335, 440, 130);
+
+        cCtx.fillStyle = '#fef08a';
+        cCtx.font = '900 23px system-ui, sans-serif';
+        cCtx.fillText('⚠️ अत्यधिक ज्वलनशील / KHATRA ⚠️', 256, 375);
+
+        cCtx.font = 'bold 19px system-ui, sans-serif';
+        cCtx.fillStyle = '#ffffff';
+        cCtx.fillText('🔥 HIGHLY FLAMMABLE LPG 🔥', 256, 412);
+        cCtx.font = 'bold 16px system-ui, sans-serif';
+        cCtx.fillStyle = '#fef08a';
+        cCtx.fillText('DIWALI HAI, DIWALA NAHI NIKALNA! 💀', 256, 445);
+
+        this.cylinderTex = new THREE.CanvasTexture(cylCanvas);
+        this.cylinderTex.anisotropy = 4;
+        this.cylinderMat = new THREE.MeshStandardMaterial({
+            map: this.cylinderTex,
+            roughness: 0.28,
+            metalness: 0.42
+        });
+
+        this.cylinderBodyMat = new THREE.MeshStandardMaterial({
+            color: 0xdc2626,
+            roughness: 0.32,
+            metalness: 0.38
+        });
+        this.cylinderBrassMat = new THREE.MeshStandardMaterial({
+            color: 0xeab308,
+            metalness: 0.92,
+            roughness: 0.18
+        });
     }
 
     createCanTextureMaterial(type) {
@@ -500,6 +579,141 @@ class PropsEngine {
             radius = 1.1;
             halfHeight = 0.1;
             mass = 0.8;
+
+        } else if (type === 'gas_cylinder') {
+            // Authentic 14.2 KG Domestic LPG Gas Cylinder (Bharat/Indane Red)
+            // Center main cylindrical body with 14.2 KG stencil texture
+            const body = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.52, 1.15, 32), this.cylinderMat);
+            body.castShadow = true;
+            body.receiveShadow = true;
+            group.add(body);
+
+            // Upper Hemispherical Dome
+            const topDome = new THREE.Mesh(
+                new THREE.SphereGeometry(0.52, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2),
+                this.cylinderBodyMat
+            );
+            topDome.position.y = 0.575;
+            topDome.castShadow = true;
+            group.add(topDome);
+
+            // Lower Hemispherical Dome
+            const botDome = new THREE.Mesh(
+                new THREE.SphereGeometry(0.52, 32, 16, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2),
+                this.cylinderBodyMat
+            );
+            botDome.position.y = -0.575;
+            botDome.castShadow = true;
+            group.add(botDome);
+
+            // Welded Center Belly Seam Ring
+            const bellySeam = new THREE.Mesh(
+                new THREE.TorusGeometry(0.526, 0.016, 8, 32),
+                this.cylinderBodyMat
+            );
+            bellySeam.rotation.x = Math.PI / 2;
+            group.add(bellySeam);
+
+            // Perforated Bottom Foot Ring Stand
+            const footRing = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.46, 0.46, 0.24, 24, 1, true),
+                this.cylinderBodyMat
+            );
+            footRing.position.y = -0.72;
+            footRing.castShadow = true;
+            group.add(footRing);
+
+            // Foot Ring Bottom Rim Edge
+            const footEdge = new THREE.Mesh(
+                new THREE.TorusGeometry(0.46, 0.02, 8, 24),
+                this.cylinderBodyMat
+            );
+            footEdge.rotation.x = Math.PI / 2;
+            footEdge.position.y = -0.84;
+            group.add(footEdge);
+
+            // Top Collar Handle Guard Ring
+            const collarRing = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.40, 0.40, 0.36, 24, 1, true),
+                this.cylinderBodyMat
+            );
+            collarRing.position.y = 0.92;
+            collarRing.castShadow = true;
+            group.add(collarRing);
+
+            const collarTopEdge = new THREE.Mesh(
+                new THREE.TorusGeometry(0.40, 0.022, 8, 24),
+                this.cylinderBodyMat
+            );
+            collarTopEdge.rotation.x = Math.PI / 2;
+            collarTopEdge.position.y = 1.10;
+            group.add(collarTopEdge);
+
+            // 3 Handle Vertical Stays (connecting top dome to collar)
+            for (let i = 0; i < 3; i++) {
+                const angle = (i * Math.PI * 2) / 3;
+                const stay = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.06, 0.38, 0.028),
+                    this.cylinderBodyMat
+                );
+                stay.position.set(Math.cos(angle) * 0.40, 0.92, Math.sin(angle) * 0.40);
+                stay.rotation.y = -angle;
+                group.add(stay);
+            }
+
+            // Stamped Inspection Code (D-26) on collar front
+            const stampCanvas = document.createElement('canvas');
+            stampCanvas.width = 128;
+            stampCanvas.height = 64;
+            const sCtx = stampCanvas.getContext('2d');
+            sCtx.fillStyle = '#b91c1c';
+            sCtx.fillRect(0, 0, 128, 64);
+            sCtx.fillStyle = '#ffffff';
+            sCtx.font = 'bold 36px monospace';
+            sCtx.textAlign = 'center';
+            sCtx.fillText('D-26', 64, 46);
+            const stampTex = new THREE.CanvasTexture(stampCanvas);
+            const stampPlate = new THREE.Mesh(
+                new THREE.PlaneGeometry(0.22, 0.11),
+                new THREE.MeshBasicMaterial({ map: stampTex })
+            );
+            stampPlate.position.set(0, 0.95, 0.41);
+            group.add(stampPlate);
+
+            // Brass Pressure Relief Valve Nozzle in center
+            const valve = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.07, 0.07, 0.20, 16),
+                this.cylinderBrassMat
+            );
+            valve.position.y = 0.78;
+            group.add(valve);
+
+            // Yellow Safety Seal Plastic Cap on Valve
+            const safetyCap = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.08, 0.08, 0.09, 16),
+                new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.4 })
+            );
+            safetyCap.position.y = 0.86;
+            group.add(safetyCap);
+
+            // Red Emergency Danger Beacon Diode on top
+            const beacon = new THREE.Mesh(
+                new THREE.SphereGeometry(0.05, 12, 12),
+                new THREE.MeshBasicMaterial({ color: 0xff0000 })
+            );
+            beacon.position.y = 0.96;
+            beacon.name = 'cylinder_beacon';
+            group.add(beacon);
+
+            radius = 0.58;
+            halfHeight = 0.95;
+            mass = 4.2;
+
+            group.userData = {
+                type: 'gas_cylinder',
+                isGasCylinder: true,
+                warningTriggered: false
+            };
         }
 
         group.position.copy(pos);
@@ -608,6 +822,17 @@ class PropsEngine {
         this.audio.playMetallicClang(0.8);
     }
 
+    spawnGasCylinder(centerX = -3.2, centerZ = 1.5) {
+        // Remove existing gas cylinder if any
+        for (let i = this.props.length - 1; i >= 0; i--) {
+            if (this.props[i].type === 'gas_cylinder') {
+                this.scene.remove(this.props[i].mesh);
+                this.props.splice(i, 1);
+            }
+        }
+        return this.createProp('gas_cylinder', new THREE.Vector3(centerX, 0.95, centerZ));
+    }
+
     spawnDabbaOverSpot(spotPos) {
         const dabba = this.createProp('big_dabba', new THREE.Vector3(spotPos.x, 0.94, spotPos.z));
         this.audio.playMetallicClang(1.2);
@@ -647,8 +872,8 @@ class PropsEngine {
                 prop.mesh.position.y = floorY + prop.halfHeight;
 
                 if (prop.vel.y < -2.4) {
-                    if (prop.type === 'can' || prop.type === 'big_dabba' || prop.type === 'thali') {
-                        this.audio.playMetallicClang(Math.min(1.2, Math.abs(prop.vel.y) * 0.08));
+                    if (prop.type === 'can' || prop.type === 'big_dabba' || prop.type === 'thali' || prop.type === 'gas_cylinder') {
+                        this.audio.playMetallicClang(Math.min(1.5, Math.abs(prop.vel.y) * 0.1));
                     }
                     prop.vel.y = -prop.vel.y * 0.42;
                     prop.vel.x *= 0.78;

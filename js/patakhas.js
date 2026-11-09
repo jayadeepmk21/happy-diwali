@@ -1212,6 +1212,15 @@ class PatakhaManager {
                     return;
                 }
 
+                // Check if 14.2 KG LPG Gas Cylinder takes a direct high-explosive hit!
+                if (prop.type === 'gas_cylinder' && totalDist < 2.4 && force >= 16) {
+                    if (window.diwaliApp && !prop.detonated) {
+                        prop.detonated = true;
+                        window.diwaliApp.detonateGasCylinder(prop);
+                        return;
+                    }
+                }
+
                 const factor = Math.pow(1 - totalDist / radius, 1.25);
                 const dir = diff.clone().normalize();
 

@@ -3,8 +3,36 @@
  * Glues together Audio, 3D Scene, Particle FX, Destructible Props, and UI controls.
  */
 
+const CYLINDER_MEME_DIALOGUES = [
+    {
+        title: "ABE SAALE! DIWALI HAI DIWALA NAHI! 💀",
+        desc: "Abe saale! Diwali hai, poore mohalle ka diwala nahi nikalna hai bc! 💀 14.2 KG ka Bharat Gas cylinder hai, Sutli Bomb nahi! Pura district sidha space mein chala jayega!"
+    },
+    {
+        title: "NASA WALE BOHOT KHATARNAK HAIN... 🚀",
+        desc: "NASA wale bohot khatarnak hain... lekin tu unse bhi bada psycho nikla bc! Cylinder ko lighter dikha raha hai?! Chandrayaan par direct entry lene ka plan hai kya?!"
+    },
+    {
+        title: "MUMMY ALERT: KHATRON KE KHILADI 🩴",
+        desc: "Cylinder baad mein phootega, pehle mummy ka flying belan aur chappal 120 km/h ki speed se sidha tere sar par aayega! Sudhar ja bhai!"
+    },
+    {
+        title: "ISRO BUDGET CUT MEME 🛰️",
+        desc: "ISRO Headquarters se call aaya hai: 'Bhai rocket launch ka budget kam tha, tu cylinder hi phod de, poore mohalle ko Mars bhej denge!'"
+    },
+    {
+        title: "SHARMA JI KA CAR ALARM 🚗",
+        desc: "Sharma ji folded hands ke saath: 'Bhai pichhle atom bomb se meri car ka bumper pehle hi toot chuka hai, ab cylinder phod ke ghar ki chhat udaayega kya?!'"
+    },
+    {
+        title: "YAMRAJ ON WHATSAPP VIDEO CALL 💀",
+        desc: "Yamraj has joined the chat: 'Beta ek baar cylinder par lighter touch kar, fir tera VIP pass sidha Yamlok ke liye confirm karta hoon!'"
+    }
+];
+
 class PatakhaApp {
     constructor() {
+        window.diwaliApp = this;
         this.container = document.getElementById('canvas-container');
         this.flashOverlay = document.getElementById('flash-overlay');
 
@@ -63,42 +91,67 @@ class PatakhaApp {
         // Wire floor click from scene
         this.scene.onFloorClick = (pos) => this.handleFloorClick(pos);
 
-        // Click & Hover interaction for 3D Sponsor Billboards (unlocked.devs.surf & jayfront.devs.surf)
+        // Click & Hover interaction for 3D Sponsor Billboards & Gas Cylinder
         this.scene.onCanvasClick = (clientX, clientY) => {
-            if (!this.environment || !this.environment.sponsorBillboards || this.environment.sponsorBillboards.length === 0) return false;
             const mouse = new THREE.Vector2(
                 (clientX / window.innerWidth) * 2 - 1,
                 -(clientY / window.innerHeight) * 2 + 1
             );
             const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(mouse, this.scene.camera);
-            const hits = raycaster.intersectObjects(this.environment.sponsorBillboards, true);
-            if (hits.length > 0) {
-                const target = hits[0].object;
-                if (target.userData && target.userData.url) {
-                    this.audio.playUIClick();
-                    this.showToast(`🚀 Opening Sponsor: ${target.userData.name}...`);
-                    window.open(target.userData.url, '_blank', 'noopener,noreferrer');
-                    return true;
+
+            // 1. Raycast Sponsor Billboards
+            if (this.environment && this.environment.sponsorBillboards && this.environment.sponsorBillboards.length > 0) {
+                const hits = raycaster.intersectObjects(this.environment.sponsorBillboards, true);
+                if (hits.length > 0) {
+                    const target = hits[0].object;
+                    if (target.userData && target.userData.url) {
+                        this.audio.playUIClick();
+                        this.showToast(`🚀 Opening Sponsor: ${target.userData.name}...`);
+                        window.open(target.userData.url, '_blank', 'noopener,noreferrer');
+                        return true;
+                    }
                 }
             }
+
+            // 2. Raycast LPG Gas Cylinder Prop
+            if (this.propsEngine && this.propsEngine.props) {
+                const cylProp = this.propsEngine.props.find(p => p.type === 'gas_cylinder');
+                if (cylProp && cylProp.mesh) {
+                    const cylHits = raycaster.intersectObject(cylProp.mesh, true);
+                    if (cylHits.length > 0) {
+                        this.triggerCylinderWarning(cylProp);
+                        return true;
+                    }
+                }
+            }
+
             return false;
         };
 
         this.scene.renderer.domElement.addEventListener('pointermove', (e) => {
-            if (!this.environment || !this.environment.sponsorBillboards || this.environment.sponsorBillboards.length === 0) return;
             const mouse = new THREE.Vector2(
                 (e.clientX / window.innerWidth) * 2 - 1,
                 -(e.clientY / window.innerHeight) * 2 + 1
             );
             const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(mouse, this.scene.camera);
-            const hits = raycaster.intersectObjects(this.environment.sponsorBillboards, true);
-            if (hits.length > 0) {
-                this.scene.renderer.domElement.style.cursor = 'pointer';
-            } else {
-                this.scene.renderer.domElement.style.cursor = 'default';
+
+            let hasHover = false;
+            if (this.environment && this.environment.sponsorBillboards && this.environment.sponsorBillboards.length > 0) {
+                const hits = raycaster.intersectObjects(this.environment.sponsorBillboards, true);
+                if (hits.length > 0) hasHover = true;
             }
+
+            if (!hasHover && this.propsEngine && this.propsEngine.props) {
+                const cylProp = this.propsEngine.props.find(p => p.type === 'gas_cylinder');
+                if (cylProp && cylProp.mesh) {
+                    const cylHits = raycaster.intersectObject(cylProp.mesh, true);
+                    if (cylHits.length > 0) hasHover = true;
+                }
+            }
+
+            this.scene.renderer.domElement.style.cursor = hasHover ? 'pointer' : 'default';
         });
 
         // Clean up previous test unlocks so all 4 locked items (Gobar, Atom, Aerial Cake, Mega Lar) are locked for testing
@@ -152,6 +205,7 @@ class PatakhaApp {
         // Spawn starter objects nicely framed around courtyard
         this.propsEngine.spawnPyramid(-3.5, -2.0);
         this.propsEngine.createProp('big_dabba', new THREE.Vector3(3.5, 0.94, -2.0));
+        this.propsEngine.spawnGasCylinder(-3.2, 1.8);
         this.updateHUDCounters();
 
         // Start animation loop
@@ -160,6 +214,13 @@ class PatakhaApp {
 
     handleFloorClick(worldPos) {
         this.audio.init();
+
+        // Check if user clicked near the 14.2 KG LPG Gas Cylinder
+        const cylinderProp = this.propsEngine.props.find(p => p.type === 'gas_cylinder');
+        if (cylinderProp && cylinderProp.mesh && cylinderProp.mesh.position.distanceTo(worldPos) < 1.45) {
+            this.triggerCylinderWarning(cylinderProp);
+            return;
+        }
 
         // Agarbatti Manual Fuse Lighting Mode
         if (this.patakhaManager.placementMode === 'agarbatti') {
@@ -865,6 +926,52 @@ class PatakhaApp {
             }, { passive: false });
         }
 
+        // 14.2 KG Gas Cylinder Bakchodi Toolbar Button
+        const btnGasCylinder = document.getElementById('btn-gas-cylinder');
+        if (btnGasCylinder) {
+            btnGasCylinder.onclick = () => {
+                this.audio.init();
+                const cylProp = this.propsEngine.spawnGasCylinder(-3.2, 1.8);
+                this.triggerCylinderWarning(cylProp);
+                this.updateHUDCounters();
+            };
+        }
+
+        // Cylinder Warning Modal Wiring
+        const btnCloseCyl = document.getElementById('btn-close-cylinder-modal');
+        if (btnCloseCyl) {
+            btnCloseCyl.onclick = () => this.closeCylinderWarningModal();
+        }
+
+        const cylModal = document.getElementById('cylinder-warning-modal');
+        if (cylModal) {
+            cylModal.onclick = (e) => {
+                if (e.target.id === 'cylinder-warning-modal') this.closeCylinderWarningModal();
+            };
+        }
+
+        const btnCylCancel = document.getElementById('btn-cylinder-cancel');
+        if (btnCylCancel) {
+            btnCylCancel.onclick = () => {
+                this.closeCylinderWarningModal();
+                this.showToast('😇 Shabaash! Samajhdaari isi mein hai, Diwali manao diwala nahi!');
+            };
+        }
+
+        const btnCylDetonate = document.getElementById('btn-cylinder-detonate');
+        if (btnCylDetonate) {
+            btnCylDetonate.onclick = () => {
+                this.detonateGasCylinder();
+            };
+        }
+
+        const btnRespawnMohalla = document.getElementById('btn-respawn-mohalla');
+        if (btnRespawnMohalla) {
+            btnRespawnMohalla.onclick = () => {
+                this.respawnMohalla();
+            };
+        }
+
         // Keyboard Shortcuts
         window.addEventListener('keydown', (e) => {
             if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
@@ -891,6 +998,8 @@ class PatakhaApp {
                 document.getElementById('btn-spawn-pyramid').click();
             } else if (e.key.toLowerCase() === 'd' || e.key.toLowerCase() === 't') {
                 document.getElementById('btn-sutli-dabba').click();
+            } else if (e.key.toLowerCase() === 'y' || e.key.toLowerCase() === 'b') {
+                if (btnGasCylinder) btnGasCylinder.click();
             } else if (e.key.toLowerCase() === 'l') {
                 if (this.dom.btnAkashDiya) this.dom.btnAkashDiya.click();
             } else if (e.key.toLowerCase() === 'g') {
@@ -905,6 +1014,115 @@ class PatakhaApp {
                 if (this.dom.btnFullscreen) this.dom.btnFullscreen.click();
             }
         });
+    }
+
+    triggerCylinderWarning(prop = null) {
+        this.audio.init();
+        this.audio.playPoliceSiren(2.4);
+
+        // Pick random dialogue
+        const randomItem = CYLINDER_MEME_DIALOGUES[Math.floor(Math.random() * CYLINDER_MEME_DIALOGUES.length)];
+        const titleEl = document.getElementById('cylinder-dialogue-title');
+        const descEl = document.getElementById('cylinder-dialogue-desc');
+        if (titleEl) titleEl.textContent = randomItem.title;
+        if (descEl) descEl.textContent = `"${randomItem.desc}"`;
+
+        // Pulse red beacon on cylinder mesh if available
+        if (prop && prop.mesh) {
+            const beacon = prop.mesh.getObjectByName('cylinder_beacon');
+            if (beacon) {
+                beacon.material.color.setHex(0xffffff);
+                setTimeout(() => beacon.material.color.setHex(0xff0000), 200);
+                setTimeout(() => beacon.material.color.setHex(0xffffff), 400);
+                setTimeout(() => beacon.material.color.setHex(0xff0000), 600);
+            }
+        }
+
+        const modal = document.getElementById('cylinder-warning-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+    }
+
+    closeCylinderWarningModal() {
+        const modal = document.getElementById('cylinder-warning-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
+    detonateGasCylinder(targetProp = null) {
+        this.closeCylinderWarningModal();
+        const prop = targetProp || this.propsEngine.props.find(p => p.type === 'gas_cylinder');
+
+        // 1. Extreme Camera Shake
+        this.scene.camState.shakeIntensity = 3.2;
+
+        // 2. Play Nuclear Blast Audio
+        this.audio.playNuclearBlast();
+
+        const blastPos = prop ? prop.mesh.position.clone() : new THREE.Vector3(-3.2, 1.0, 1.8);
+
+        // 3. Mega Particle Burst
+        for (let i = 0; i < 95; i++) {
+            const vel = new THREE.Vector3(
+                (Math.random() - 0.5) * 28,
+                8 + Math.random() * 25,
+                (Math.random() - 0.5) * 28
+            );
+            this.particles.spawnSpark(blastPos, vel, 0xff3b30, 2.4, 0.7);
+        }
+
+        // 4. Heavy Smoke Cloud
+        for (let i = 0; i < 22; i++) {
+            const sVel = new THREE.Vector3(
+                (Math.random() - 0.5) * 14,
+                4 + Math.random() * 12,
+                (Math.random() - 0.5) * 14
+            );
+            this.particles.spawnSmoke(blastPos, sVel, 0x1f2937, 0.8, 0.95, 3.2, 3.5);
+        }
+
+        // 5. Rocket Physics Launch on Cylinder Mesh (ISRO launch!)
+        if (prop) {
+            prop.isStatic = false;
+            prop.vel.set((Math.random() - 0.5) * 12, 90, (Math.random() - 0.5) * 12);
+            prop.angVel.set(18, 28, 14);
+            prop.airborne = true;
+        }
+
+        // 6. White-Out Nuclear Screen Flash & Mohalla Disconnected Modal
+        setTimeout(() => {
+            const overlay = document.getElementById('cylinder-nuclear-overlay');
+            const content = document.getElementById('nuclear-content');
+            if (overlay && content) {
+                overlay.classList.remove('hidden');
+                overlay.style.backgroundColor = '#ffffff';
+                setTimeout(() => {
+                    overlay.style.backgroundColor = 'rgba(15, 23, 42, 0.96)';
+                    content.classList.remove('opacity-0', 'scale-90');
+                    content.classList.add('opacity-100', 'scale-100');
+                }, 400);
+            }
+        }, 550);
+    }
+
+    respawnMohalla() {
+        const overlay = document.getElementById('cylinder-nuclear-overlay');
+        const content = document.getElementById('nuclear-content');
+        if (overlay && content) {
+            content.classList.add('opacity-0', 'scale-90');
+            content.classList.remove('opacity-100', 'scale-100');
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+            }, 300);
+        }
+
+        // Respawn Gas Cylinder & Props
+        this.propsEngine.spawnGasCylinder(-3.2, 1.8);
+        this.propsEngine.spawnPyramid(-3.5, -2.0);
+        this.showToast('🪔 Mohalla Wapas Aa Gaya! Agli baar cylinder se door rehna bhai! 😂');
+        this.updateHUDCounters();
     }
 
     loop(now) {

@@ -161,6 +161,71 @@
         </div>
     </div>
 
+    <!-- GAS CYLINDER DANGER & MEME WARNING MODAL -->
+    <div id="cylinder-warning-modal" class="fixed inset-0 z-50 pointer-events-auto bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden transition-all">
+        <div class="hud-glass rounded-3xl p-5 md:p-6 border-2 border-red-500/80 shadow-[0_20px_70px_rgba(239,68,68,0.6)] max-w-sm md:max-w-md w-full text-center relative flex flex-col items-center gap-3">
+            
+            <!-- Close Button -->
+            <button id="btn-close-cylinder-modal" class="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-red-300 text-xs font-bold transition">
+                ✕
+            </button>
+
+            <!-- Pulsing Danger Siren & Cylinder Icon -->
+            <div class="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-red-600 via-rose-700 to-amber-700 flex items-center justify-center text-3xl shadow-xl shadow-red-500/50 border border-red-400 animate-bounce">
+                <span>🚨</span>
+                <span class="absolute -bottom-1 -right-1 text-xl">🛢️</span>
+            </div>
+
+            <!-- Title & Meme Dialogue -->
+            <div>
+                <div class="text-[11px] font-black text-red-400 uppercase tracking-widest flex items-center justify-center gap-1">
+                    <span>⚠️</span> <span>EXTREME DANGER: BHARAT GAS 14.2 KG</span> <span>⚠️</span>
+                </div>
+                <h3 id="cylinder-dialogue-title" class="text-base md:text-lg font-black text-amber-200 uppercase tracking-wide mt-1">
+                    ABE SAALE! DIWALI HAI DIWALA NAHI NIKALNA! 💀
+                </h3>
+                <p id="cylinder-dialogue-desc" class="text-xs md:text-sm text-red-100/90 mt-2 leading-relaxed bg-red-950/60 p-3 rounded-2xl border border-red-500/40 font-medium">
+                    "Abe saale! Diwali hai, poore mohalle ka diwala nahi nikalna hai bc! 💀 14.2 KG ka Bharat Gas cylinder hai, Sutli Bomb nahi! Pura district sidha space mein chala jayega!"
+                </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="w-full flex flex-col gap-2 mt-1">
+                <!-- Safe Choice: Maaf Karo -->
+                <button id="btn-cylinder-cancel" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-xs md:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 active:scale-95 transition">
+                    <span>😇</span>
+                    <span>Maaf Karo Bhai, Bach Gaya! (Safe)</span>
+                </button>
+
+                <!-- Extreme Desi Choice: Phir Bhi Phodunga -->
+                <button id="btn-cylinder-detonate" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-black text-xs md:text-sm flex items-center justify-center gap-2 shadow-lg shadow-red-600/50 active:scale-95 transition border border-red-400">
+                    <span>😈💥</span>
+                    <span>Nahi Sudhrunga, Phir Bhi Phodo bc! (TATA BYE BYE)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NUCLEAR CYLINDER BLAST / MOHALLA DISCONNECTED OVERLAY -->
+    <div id="cylinder-nuclear-overlay" class="fixed inset-0 z-[100] pointer-events-auto bg-white flex flex-col items-center justify-center p-6 hidden transition-all duration-700 text-center">
+        <div id="nuclear-content" class="flex flex-col items-center gap-4 max-w-lg transition-all duration-500 transform scale-90 opacity-0">
+            <div class="text-6xl md:text-8xl animate-bounce">🪐💥💀</div>
+            <h1 class="text-2xl md:text-4xl font-black text-red-600 tracking-wider uppercase">
+                MOHALLA DISCONNECTED!
+            </h1>
+            <div class="text-sm md:text-base text-slate-900 font-bold bg-amber-100 p-4 rounded-2xl border-2 border-red-500 shadow-xl leading-relaxed">
+                🎉 <span class="text-red-700 font-black">BADHAAYI HO!</span><br>
+                Aapne cylinder par bomb laga kar poore mohalle ko <span class="text-purple-700 underline font-black">Chandrayaan-4</span> bana diya! Ab Sharma ji aur unki car dono Mars ke orbit mein ghoom rahe hain! 🚀🪐
+            </div>
+            <p class="text-xs text-slate-600 font-mono">
+                Casualty Report: 100% Mohalla Vaporized • Belan Speed: 150 km/h • Diwali Status: Diwala Nikal Gaya
+            </p>
+            <button id="btn-respawn-mohalla" class="mt-2 py-3 px-8 rounded-full bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white font-black text-sm md:text-base shadow-2xl hover:scale-105 active:scale-95 transition border-2 border-white">
+                🔄 Agli Baar Sudhar Jao & Respawn Mohalla
+            </button>
+        </div>
+    </div>
+
     <!-- Toast Notification Banner -->
     <div id="toast-banner" class="fixed top-16 md:top-20 left-1/2 -translate-x-1/2 z-30 pointer-events-none opacity-0 transition-all duration-300 transform -translate-y-2">
         <div class="hud-glass px-4 py-2 rounded-full border border-amber-400/50 text-amber-200 font-bold text-xs md:text-sm shadow-2xl flex items-center gap-2">
@@ -343,6 +408,11 @@
                 <span>🏮</span>
                 <span class="text-[10px] sm:text-xs font-bold hidden sm:inline">Akash Diya</span>
                 <span class="text-[10px] sm:text-xs font-bold sm:hidden">Diya</span>
+            </button>
+            <button id="btn-gas-cylinder" class="mode-pill text-red-300 hover:text-white flex-1" title="14.2 KG Gas Cylinder Bakchodi [Key: G / X]">
+                <span>🛢️</span>
+                <span class="text-[10px] sm:text-xs font-bold hidden sm:inline">Cylinder</span>
+                <span class="text-[10px] sm:text-xs font-bold sm:hidden">Gas</span>
             </button>
 
             <!-- Vertical Divider -->

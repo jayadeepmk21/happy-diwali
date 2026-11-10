@@ -67,3 +67,4 @@ assert origin in locs, f"Origin {origin} not found in sitemap"
 print(f"PASS: sitemap.xml parsed successfully with {len(locs)} URLs: {locs}")
 
 print("ALL SEO CHECKS PASSED SUCCESSFULLY!")
+

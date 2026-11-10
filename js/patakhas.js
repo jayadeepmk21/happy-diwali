@@ -3,6 +3,11 @@
  * 10 Iconic Indian Crackers with accurate 3D procedural meshes, fuses, and custom detonation effects.
  */
 
+// Zero-allocation reusable vectors for physics & loop operations
+const _pScratchV1 = new THREE.Vector3();
+const _pScratchV2 = new THREE.Vector3();
+const _pScratchDir = new THREE.Vector3();
+
 const PATAKHA_DEFINITIONS = [
     {
         id: 'sutli',
@@ -283,7 +288,7 @@ class PatakhaManager {
     triggerDynamicLight(pos, colorHex, intensity = 10, duration = 0.35) {
         let slot = this.flashLights.find(f => f.life <= 0) || this.flashLights[0];
         slot.light.color.setHex(colorHex);
-        slot.light.position.copy(pos).add(new THREE.Vector3(0, 1.2, 0));
+        slot.light.position.set(pos.x, pos.y + 1.2, pos.z);
         slot.light.intensity = intensity;
         slot.peak = intensity;
         slot.life = duration;
@@ -1223,11 +1228,11 @@ class PatakhaManager {
     }
 
     applyBlastPhysics(origin, radius, force) {
-        // 1. Impulse props & shatter matkas
+        // 1. Impulse props & shatter matkas (Zero GC scratch vector calculations)
         this.propsEngine.props.forEach(prop => {
-            const diff = new THREE.Vector3().subVectors(prop.mesh.position, origin);
-            const horizDist = Math.sqrt(diff.x * diff.x + diff.z * diff.z);
-            const totalDist = diff.length();
+            _pScratchV1.subVectors(prop.mesh.position, origin);
+            const horizDist = Math.sqrt(_pScratchV1.x * _pScratchV1.x + _pScratchV1.z * _pScratchV1.z);
+            const totalDist = _pScratchV1.length();
 
             // Wake up stacked props if blast shockwave reaches near them
             if (prop.isStatic && totalDist < radius * 1.5) {
@@ -1251,30 +1256,30 @@ class PatakhaManager {
                 }
 
                 const factor = Math.pow(1 - totalDist / radius, 1.25);
-                const dir = diff.clone().normalize();
+                _pScratchDir.copy(_pScratchV1).normalize();
 
                 // Classic "Dabba Udao" trick: If bomb is directly beneath the tin dabba, shoot sky-high!
                 if (horizDist < 1.3) {
-                    dir.set((Math.random() - 0.5) * 0.16, 1.85, (Math.random() - 0.5) * 0.16);
-                    dir.normalize();
+                    _pScratchDir.set((Math.random() - 0.5) * 0.16, 1.85, (Math.random() - 0.5) * 0.16).normalize();
 
                     // Gunpowder ejection burst beneath the flying Dabba
                     for (let s = 0; s < 10; s++) {
-                        const sVel = new THREE.Vector3(
+                        _pScratchV2.set(
                             (Math.random() - 0.5) * 8,
                             Math.random() * 4,
                             (Math.random() - 0.5) * 8
                         );
-                        this.particles.spawnSmoke(origin, sVel, 0x475569, 0.6, 0.8, 1.5, 1.4);
+                        this.particles.spawnSmoke(origin, _pScratchV2, 0x475569, 0.6, 0.8, 1.5, 1.4);
                     }
                 } else {
-                    dir.y = Math.max(0.55, dir.y + 0.65);
-                    dir.normalize();
+                    _pScratchDir.y = Math.max(0.55, _pScratchDir.y + 0.65);
+                    _pScratchDir.normalize();
                 }
 
                 const multiplier = (prop.type === 'big_dabba' && horizDist < 1.3) ? 1.75 : 1.3;
                 const impulse = (force * factor * multiplier) / prop.mass;
-                this.propsEngine.applyImpulse(prop, dir.multiplyScalar(impulse));
+                _pScratchDir.multiplyScalar(impulse);
+                this.propsEngine.applyImpulse(prop, _pScratchDir);
             }
         });
 
@@ -1707,7 +1712,7 @@ class PatakhaManager {
                     while (b.effectTimer >= 0.088 && b.larIndex < crackers.length) {
                         b.effectTimer -= 0.088;
                         const cMesh = crackers[b.larIndex];
-                        const cWorld = new THREE.Vector3();
+                        const cWorld = _pScratchV1;
                         cMesh.getWorldPosition(cWorld);
                         cMesh.visible = false;
 
@@ -1754,7 +1759,7 @@ class PatakhaManager {
                     while (b.effectTimer >= 0.042 && b.larIndex < crackers.length) {
                         b.effectTimer -= 0.042;
                         const cMesh = crackers[b.larIndex];
-                        const cWorld = new THREE.Vector3();
+                        const cWorld = _pScratchV1;
                         cMesh.getWorldPosition(cWorld);
                         cMesh.visible = false;
                         if (cMesh.userData.band) cMesh.userData.band.visible = false;
@@ -1793,7 +1798,7 @@ class PatakhaManager {
                     if (b.larIndex >= crackers.length) {
                         if (headBomb && headBomb.visible) {
                             headBomb.visible = false;
-                            const hWorld = new THREE.Vector3();
+                            const hWorld = _pScratchV1;
                             headBomb.getWorldPosition(hWorld);
 
                             // Grand Finale Mahabali explosion!

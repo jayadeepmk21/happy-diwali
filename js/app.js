@@ -675,19 +675,36 @@ class PatakhaApp {
     }
 
     updateHUDCounters() {
-        if (this.dom.statExploded) this.dom.statExploded.textContent = this.patakhaManager.totalExploded;
-        if (this.dom.statCans) this.dom.statCans.textContent = this.propsEngine.cansLaunchedCount;
-        if (this.dom.statMatkas) this.dom.statMatkas.textContent = this.propsEngine.matkasShatteredCount;
+        const exploded = this.patakhaManager.totalExploded;
+        if (this._lastExploded !== exploded) {
+            this._lastExploded = exploded;
+            if (this.dom.statExploded) this.dom.statExploded.textContent = exploded;
+        }
+
+        const cans = this.propsEngine.cansLaunchedCount;
+        if (this._lastCans !== cans) {
+            this._lastCans = cans;
+            if (this.dom.statCans) this.dom.statCans.textContent = cans;
+        }
+
+        const matkas = this.propsEngine.matkasShatteredCount;
+        if (this._lastMatkas !== matkas) {
+            this._lastMatkas = matkas;
+            if (this.dom.statMatkas) this.dom.statMatkas.textContent = matkas;
+        }
 
         const unlit = this.patakhaManager.activeBombs.filter(b => b.state === 'unlit').length;
-        if (this.dom.unlitCount) this.dom.unlitCount.textContent = unlit;
+        if (this._lastUnlit !== unlit) {
+            this._lastUnlit = unlit;
+            if (this.dom.unlitCount) this.dom.unlitCount.textContent = unlit;
 
-        if (unlit > 0) {
-            this.dom.detonatePanel.classList.remove('scale-0', 'opacity-0');
-            this.dom.detonatePanel.classList.add('scale-100', 'opacity-100');
-        } else {
-            this.dom.detonatePanel.classList.remove('scale-100', 'opacity-100');
-            this.dom.detonatePanel.classList.add('scale-0', 'opacity-0');
+            if (unlit > 0) {
+                this.dom.detonatePanel.classList.remove('scale-0', 'opacity-0');
+                this.dom.detonatePanel.classList.add('scale-100', 'opacity-100');
+            } else {
+                this.dom.detonatePanel.classList.remove('scale-100', 'opacity-100');
+                this.dom.detonatePanel.classList.add('scale-0', 'opacity-0');
+            }
         }
     }
 
@@ -1158,6 +1175,14 @@ class PatakhaApp {
     loop(now) {
         requestAnimationFrame((n) => this.loop(n));
 
+        // Power-saving & thermal throttling check: pause when mobile tab is hidden
+        if (document.hidden) {
+            this.lastTime = now;
+            return;
+        }
+
+        if (this.scene && this.scene.contextLost) return;
+
         const rawDt = Math.min(0.05, (now - this.lastTime) / 1000);
         this.lastTime = now;
         const dt = rawDt * this.timeScale;
@@ -1183,10 +1208,14 @@ class PatakhaApp {
             this.environment.update(dt, this.audio.currentDb);
         }
 
-        // 6. Decay Sound Decibel Meter & update HUD
+        // 6. Decay Sound Decibel Meter & update HUD (Throttled UI updates for 60 FPS mobile smoothness)
         this.audio.currentDb = Math.max(35, this.audio.currentDb - rawDt * 38);
-        this.updateDecibelUI(Math.round(this.audio.currentDb));
-        this.updateHUDCounters();
+        this.uiThrottleTimer = (this.uiThrottleTimer || 0) + rawDt;
+        if (this.uiThrottleTimer >= 0.066) {
+            this.uiThrottleTimer = 0;
+            this.updateDecibelUI(Math.round(this.audio.currentDb));
+            this.updateHUDCounters();
+        }
     }
 }
 

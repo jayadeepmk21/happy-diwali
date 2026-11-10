@@ -12,14 +12,19 @@ class CourtyardScene {
 
         this.camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 350);
 
-        // Optimal mobile & desktop renderer (Cap DPR to 1.25 on mobile, 1.5 on desktop for rock-solid 60 FPS)
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
-        const maxDpr = isMobile ? 1.25 : 1.5;
+        // Optimal mobile & desktop renderer (Cap DPR to 1.0 on mobile, 1.5 on desktop for rock-solid 60 FPS)
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || 
+                         window.innerWidth < 768 || 
+                         (navigator.deviceMemory && navigator.deviceMemory <= 4);
+        this.isMobile = isMobile;
+        const maxDpr = isMobile ? 1.0 : 1.5;
 
         this.renderer = new THREE.WebGLRenderer({
             antialias: !isMobile,
             powerPreference: 'high-performance',
-            precision: isMobile ? 'mediump' : 'highp'
+            precision: isMobile ? 'mediump' : 'highp',
+            stencil: false,
+            depth: true
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxDpr));
@@ -30,6 +35,18 @@ class CourtyardScene {
         this.renderer.outputEncoding = THREE.sRGBEncoding;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
         this.renderer.toneMappingExposure = 1.18;
+
+        // Context loss protection for low-memory mobile hardware
+        this.contextLost = false;
+        this.renderer.domElement.addEventListener('webglcontextlost', (e) => {
+            e.preventDefault();
+            this.contextLost = true;
+            console.warn('WebGL context lost - Pausing rendering to conserve mobile memory.');
+        }, false);
+        this.renderer.domElement.addEventListener('webglcontextrestored', () => {
+            this.contextLost = false;
+            console.log('WebGL context restored - Resuming rendering.');
+        }, false);
 
         this.container.appendChild(this.renderer.domElement);
 
@@ -76,8 +93,8 @@ class CourtyardScene {
         this.moonLight = new THREE.DirectionalLight(0xa5c4f5, 0.85);
         this.moonLight.position.set(30, 48, -22);
         this.moonLight.castShadow = true;
-        this.moonLight.shadow.mapSize.width = 1024;
-        this.moonLight.shadow.mapSize.height = 1024;
+        this.moonLight.shadow.mapSize.width = this.isMobile ? 512 : 1024;
+        this.moonLight.shadow.mapSize.height = this.isMobile ? 512 : 1024;
         this.moonLight.shadow.camera.near = 5;
         this.moonLight.shadow.camera.far = 110;
         const d = 32;
@@ -161,6 +178,15 @@ class CourtyardScene {
     }
 
     spawnSkyLantern(pos) {
+        if (this.skyLanterns.length >= (this.isMobile ? 8 : 16)) {
+            const old = this.skyLanterns.shift();
+            this.scene.remove(old.group);
+            old.group.traverse(c => {
+                if (c.geometry) c.geometry.dispose();
+                if (c.material) c.material.dispose();
+            });
+        }
+
         const group = new THREE.Group();
         const paperMat = new THREE.MeshStandardMaterial({
             color: 0xf59e0b,
@@ -203,17 +229,25 @@ class CourtyardScene {
 
     createRealisticMohallaFloorTextures() {
         const size = 2048;
-        const canvas = document.createElement('canvas');
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext('2d');
-
-        // High-precision Bump Canvas (1024x1024)
         const bumpSize = 1024;
+        const renderScale = this.isMobile ? 0.5 : 1.0;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(size * renderScale);
+        canvas.height = Math.round(size * renderScale);
+        const ctx = canvas.getContext('2d');
+        if (renderScale !== 1.0) {
+            ctx.scale(renderScale, renderScale);
+        }
+
+        // High-precision Bump Canvas
         const bumpCanvas = document.createElement('canvas');
-        bumpCanvas.width = bumpSize;
-        bumpCanvas.height = bumpSize;
+        bumpCanvas.width = Math.round(bumpSize * renderScale);
+        bumpCanvas.height = Math.round(bumpSize * renderScale);
         const bCtx = bumpCanvas.getContext('2d');
+        if (renderScale !== 1.0) {
+            bCtx.scale(renderScale, renderScale);
+        }
 
         // 1. Dark Mortar Grout Base
         ctx.fillStyle = '#0c0a15';
@@ -521,17 +555,20 @@ class CourtyardScene {
         const diffTex = new THREE.CanvasTexture(canvas);
         diffTex.wrapS = THREE.RepeatWrapping;
         diffTex.wrapT = THREE.RepeatWrapping;
+        diffTex.generateMipmaps = !this.isMobile;
+        diffTex.minFilter = this.isMobile ? THREE.LinearFilter : THREE.LinearMipmapLinearFilter;
 
         const bumpTex = new THREE.CanvasTexture(bumpCanvas);
         bumpTex.wrapS = THREE.RepeatWrapping;
         bumpTex.wrapT = THREE.RepeatWrapping;
+        bumpTex.generateMipmaps = !this.isMobile;
+        bumpTex.minFilter = this.isMobile ? THREE.LinearFilter : THREE.LinearMipmapLinearFilter;
 
         return { diffuse: diffTex, bump: bumpTex };
     }
 
     initCourtyardCurbs() {
-        // Raised 3D Indian Street Curbs (Patri) with Alternating Yellow & Charcoal curb blocks
-        const curbGroup = new THREE.Group();
+        // High-performance Instanced 3D Indian Street Curbs (Patri) - Only 2 draw calls for all 110+ curb blocks!
         const yellowMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.75 });
         const darkMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.85 });
 
@@ -539,49 +576,72 @@ class CourtyardScene {
         const blockLen = 1.75;
         const curbHeight = 0.32;
         const curbWidth = 0.55;
+        const curbGeo = new THREE.BoxGeometry(blockLen - 0.05, curbHeight, curbWidth);
+
+        const yellowTransforms = [];
+        const darkTransforms = [];
+        const dummy = new THREE.Object3D();
 
         // North edge (z = -curbHalf)
         for (let x = -curbHalf; x <= curbHalf; x += blockLen) {
-            const mat = (Math.round((x + curbHalf) / blockLen) % 2 === 0) ? yellowMat : darkMat;
-            const b = new THREE.Mesh(new THREE.BoxGeometry(blockLen - 0.05, curbHeight, curbWidth), mat);
-            b.position.set(x + blockLen / 2, curbHeight / 2, -curbHalf);
-            b.receiveShadow = true;
-            b.castShadow = true;
-            curbGroup.add(b);
+            dummy.position.set(x + blockLen / 2, curbHeight / 2, -curbHalf);
+            dummy.rotation.set(0, 0, 0);
+            dummy.updateMatrix();
+            if (Math.round((x + curbHalf) / blockLen) % 2 === 0) {
+                yellowTransforms.push(dummy.matrix.clone());
+            } else {
+                darkTransforms.push(dummy.matrix.clone());
+            }
         }
 
-        // South edge (z = curbHalf) - leave an 8m entrance opening in the center (x between -4 and 4)
+        // South edge (z = curbHalf) - 8m entrance gateway
         for (let x = -curbHalf; x <= curbHalf; x += blockLen) {
-            if (x >= -4.5 && x <= 4.5) continue; // Entrance gateway
-            const mat = (Math.round((x + curbHalf) / blockLen) % 2 === 0) ? yellowMat : darkMat;
-            const b = new THREE.Mesh(new THREE.BoxGeometry(blockLen - 0.05, curbHeight, curbWidth), mat);
-            b.position.set(x + blockLen / 2, curbHeight / 2, curbHalf);
-            b.receiveShadow = true;
-            b.castShadow = true;
-            curbGroup.add(b);
+            if (x >= -4.5 && x <= 4.5) continue;
+            dummy.position.set(x + blockLen / 2, curbHeight / 2, curbHalf);
+            dummy.rotation.set(0, 0, 0);
+            dummy.updateMatrix();
+            if (Math.round((x + curbHalf) / blockLen) % 2 === 0) {
+                yellowTransforms.push(dummy.matrix.clone());
+            } else {
+                darkTransforms.push(dummy.matrix.clone());
+            }
         }
 
-        // West edge (x = -curbHalf)
+        // West edge (x = -curbHalf) - rotated 90 deg along Z axis
         for (let z = -curbHalf; z <= curbHalf; z += blockLen) {
-            const mat = (Math.round((z + curbHalf) / blockLen) % 2 === 0) ? yellowMat : darkMat;
-            const b = new THREE.Mesh(new THREE.BoxGeometry(curbWidth, curbHeight, blockLen - 0.05), mat);
-            b.position.set(-curbHalf, curbHeight / 2, z + blockLen / 2);
-            b.receiveShadow = true;
-            b.castShadow = true;
-            curbGroup.add(b);
+            dummy.position.set(-curbHalf, curbHeight / 2, z + blockLen / 2);
+            dummy.rotation.set(0, Math.PI / 2, 0);
+            dummy.updateMatrix();
+            if (Math.round((z + curbHalf) / blockLen) % 2 === 0) {
+                yellowTransforms.push(dummy.matrix.clone());
+            } else {
+                darkTransforms.push(dummy.matrix.clone());
+            }
         }
 
-        // East edge (x = curbHalf)
+        // East edge (x = curbHalf) - rotated 90 deg along Z axis
         for (let z = -curbHalf; z <= curbHalf; z += blockLen) {
-            const mat = (Math.round((z + curbHalf) / blockLen) % 2 === 0) ? yellowMat : darkMat;
-            const b = new THREE.Mesh(new THREE.BoxGeometry(curbWidth, curbHeight, blockLen - 0.05), mat);
-            b.position.set(curbHalf, curbHeight / 2, z + blockLen / 2);
-            b.receiveShadow = true;
-            b.castShadow = true;
-            curbGroup.add(b);
+            dummy.position.set(curbHalf, curbHeight / 2, z + blockLen / 2);
+            dummy.rotation.set(0, Math.PI / 2, 0);
+            dummy.updateMatrix();
+            if (Math.round((z + curbHalf) / blockLen) % 2 === 0) {
+                yellowTransforms.push(dummy.matrix.clone());
+            } else {
+                darkTransforms.push(dummy.matrix.clone());
+            }
         }
 
-        this.scene.add(curbGroup);
+        const yellowMesh = new THREE.InstancedMesh(curbGeo, yellowMat, yellowTransforms.length);
+        yellowMesh.receiveShadow = true;
+        yellowTransforms.forEach((m, i) => yellowMesh.setMatrixAt(i, m));
+        yellowMesh.instanceMatrix.needsUpdate = true;
+        this.scene.add(yellowMesh);
+
+        const darkMesh = new THREE.InstancedMesh(curbGeo, darkMat, darkTransforms.length);
+        darkMesh.receiveShadow = true;
+        darkTransforms.forEach((m, i) => darkMesh.setMatrixAt(i, m));
+        darkMesh.instanceMatrix.needsUpdate = true;
+        this.scene.add(darkMesh);
     }
 
     initFlowerPetalScatter() {
@@ -1199,6 +1259,7 @@ class CourtyardScene {
     }
 
     update(dt) {
+        if (this.contextLost) return;
         // Subtle realistic street lamp glow
         if (this.streetLamps) {
             const time = performance.now() * 0.003;
@@ -1239,6 +1300,10 @@ class CourtyardScene {
 
             if (sl.group.position.y > 110) {
                 this.scene.remove(sl.group);
+                sl.group.traverse(c => {
+                    if (c.geometry) c.geometry.dispose();
+                    if (c.material) c.material.dispose();
+                });
                 this.skyLanterns.splice(i, 1);
             }
         }
